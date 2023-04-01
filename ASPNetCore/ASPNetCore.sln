@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33414.496
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASPNetCoreApp", "ASPNetCoreApp\ASPNetCoreApp.csproj", "{F999F3C2-712E-40EB-8CB1-C9751FFACEF4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASPNetCoreApp", "ASPNetCoreApp\ASPNetCoreApp.csproj", "{F999F3C2-712E-40EB-8CB1-C9751FFACEF4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

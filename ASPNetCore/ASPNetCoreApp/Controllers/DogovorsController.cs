@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Metadata;
 using ASPNetCoreApp.Models;
-namespace ASPNetCoreApp.Controllers
+using Microsoft.AspNetCore.Cors;
+namespace WebAPI.Controllers
 {
     [Route("api/[controller]")]
+    [EnableCors]
     [ApiController]
     public class DogovorsController : ControllerBase
     {
@@ -13,92 +14,92 @@ namespace ASPNetCoreApp.Controllers
         public DogovorsController(OperatorContext context)
         {
             _context = context;
-            if (_context.Dogovor.Count() == 0)
-            {
-                _context.Dogovor.Add(new Dogovor {
-                    Номер_договора = 1,
-                    Дата_заключения = DateTime.Today,
-                    Дата_расторжения = DateTime.Today,
-                    Код_тарифа_FK = 1,
-                    Номер_телефона = "1",
-                    Номер_клиента_FK = 1,
-                    Серийный_номер_сим_карты ="1"
-                });
-                _context.SaveChanges();
-            }
         }
 
+        // GET: api/Dogovors
         [HttpGet]
-        public IEnumerable<Dogovor> GetAll()
+        public async Task<ActionResult<IEnumerable<Dogovor>>> GetDogovor()
         {
-            return _context.Dogovor;
+            return await _context.Dogovor.Include(p => p.Тариф).ToListAsync();
         }
 
+        // GET: api/Dogovors/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetDogovor([FromRoute] int id)
+        public async Task<ActionResult<Dogovor>> GetDogovor(int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var dogovor= await _context.Dogovor.SingleOrDefaultAsync(m => m.Номер_договора == id);
+            var dogovor = await _context.Dogovor.FindAsync(id);
 
             if (dogovor == null)
             {
                 return NotFound();
             }
 
-            return Ok(dogovor);
+            return dogovor;
         }
 
+        // PUT: api/Dogovor/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutDogovor(int id, Dogovor dogovor)
+        {
+            if (id != dogovor.Номер_договора)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(dogovor).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!DogovorExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        // POST: api/Dogovors
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Dogovor dogovor)
+        public async Task<ActionResult<Dogovor>> PostDogovor(Dogovor dogovor)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-
             _context.Dogovor.Add(dogovor);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetDogovor", new { Номер_договора = dogovor.Номер_договора}, dogovor);
+            return CreatedAtAction("GetDogovor", new { id = dogovor.Номер_договора }, dogovor);
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] Dogovor dogovor)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            var item = _context.Dogovor.Find(id);
-            if (item == null)
-            {
-                return NotFound();
-            }
-            item.Номер_договора = dogovor.Номер_договора;
-            _context.Dogovor.Update(item);
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
-
+        // DELETE: api/Dogovors/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete([FromRoute] int id)
+        public async Task<IActionResult> DeleteDogovor(int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            var item = _context.Dogovor.Find(id);
-            if (item == null)
+            var dogovor = await _context.Dogovor.FindAsync(id);
+            if (dogovor == null)
             {
                 return NotFound();
             }
-            _context.Dogovor.Remove(item);
+
+            _context.Dogovor.Remove(dogovor);
             await _context.SaveChangesAsync();
+
             return NoContent();
+        }
+
+        private bool DogovorExists(int id)
+        {
+            return _context.Dogovor.Any(e => e.Номер_договора == id);
         }
     }
 }

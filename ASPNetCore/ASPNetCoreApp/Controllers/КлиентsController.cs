@@ -2,9 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using System.Reflection.Metadata;
 using ASPNetCoreApp.Models;
+using Microsoft.AspNetCore.Cors;
 namespace ASPNetCoreApp.Controllers
 {
     [Route("api/[controller]")]
+    [EnableCors]
     [ApiController]
     public class КлиентsController : ControllerBase
     {
@@ -18,11 +20,13 @@ namespace ASPNetCoreApp.Controllers
                 _context.Клиент.Add(new Клиент
                 {
                      Баланс=1,
-                      Номер_клиента=1,
-                       ФИО="1"
+                    Номер_клиента = 1,
+                     ФИО = "Иванов И.И."
+                       
                    
                 });
                 _context.SaveChanges();
+
             }
         }
 

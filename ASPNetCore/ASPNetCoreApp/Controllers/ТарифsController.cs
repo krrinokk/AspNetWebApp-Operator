@@ -2,9 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using System.Reflection.Metadata;
 using ASPNetCoreApp.Models;
+using Microsoft.AspNetCore.Cors;
 namespace ASPNetCoreApp.Controllers
 {
     [Route("api/[controller]")]
+    [EnableCors]
     [ApiController]
     public class ТарифsController : ControllerBase
     {
@@ -17,12 +19,17 @@ namespace ASPNetCoreApp.Controllers
             {
                 _context.Тариф.Add(new Тариф
                 {
-                   Год_начала=1,
+                   Дата_открытия=DateTime.Today,
                     Код_тарифа=1,
-                     Минута_межгород_стоимость=1,
-                      Минута_международная_стоимость=1,
-                       Название_тарифа="1",
-                        Стоимость_перехода=1
+                     Код_типа_тарифа_FK=1, 
+                      Минута_межгород_стоимость=1, 
+                       Минута_международная_стоимость=10, 
+                        Название_тарифа="Black",
+                         Статус="Locked",
+                          Стоимость_перехода=100,
+                           
+
+
                 });
                 _context.SaveChanges();
             }

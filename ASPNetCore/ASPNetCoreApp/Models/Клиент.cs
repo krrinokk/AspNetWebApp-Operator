@@ -13,8 +13,11 @@ namespace ASPNetCoreApp.Models
         }
      [Key]
         public int Номер_клиента { get; set; }
-       public string ФИО { get; set; }
-       public decimal? Баланс { get; set; }
-        public virtual ICollection<Dogovor> Dogovor { get; set; }
+
+        public string? ФИО { get; set; }
+
+        public decimal? Баланс { get; set; }
+
+        public virtual ICollection<Dogovor>? Dogovor { get; set; }
     }
 }

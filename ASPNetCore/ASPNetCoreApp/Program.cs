@@ -1,55 +1,41 @@
-using ASPNetCoreApp.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ASPNetCoreApp.Models;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using System.Text.Json;
 using System.Text.Json.Serialization;
-using Newtonsoft.Json.Serialization;
+using ASPNetCoreApp.Models;
+using ASPNetCoreApp.Data;
+using ASPNetCoreApp.Models;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<OperatorContext>(opt =>
-    opt.UseInMemoryDatabase("TodoList"));
-
-
-var options = new JsonSerializerOptions()
+builder.Services.AddCors(options =>
 {
-    NumberHandling = JsonNumberHandling.AllowReadingFromString |
-     JsonNumberHandling.WriteAsString
-};
+    options.AddDefaultPolicy(
+    builder =>
+    {
+        builder.WithOrigins("http://localhost:3000")
+    .AllowAnyHeader()
+    .AllowAnyMethod();
 
-//builder.Services.AddMvc()
-//.SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
-//.AddJsonOptions(options => {
-//    var resolver = options.JsonSerializerOptions.ContractResolver;
-//    if (resolver != null)
-//        (resolver as DefaultContractResolver).NamingStrategy =
-//        null;
-//});
+    });
+});
+
 
 
 // Add services to the container.
-builder.Services.AddControllersWithViews()
-            // Maintain property names during serialization. See:
-            // https://github.com/aspnet/Announcements/issues/194
-            .AddJsonOptions(options =>
-                options.JsonSerializerOptions.PropertyNamingPolicy = null);
-
-// Add Kendo UI services to the services container
-
-// Add services to the container.
-
-builder.Services.AddControllers();
+builder.Services.AddIdentity<User, IdentityRole>()
+.AddEntityFrameworkStores<OperatorContext>();
+builder.Services.AddDbContext<OperatorContext>();
+builder.Services.AddControllers().AddJsonOptions(x =>
+                x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var operatorContext = scope.ServiceProvider.GetRequiredService<OperatorContext>();
+    await OperatorContextSeed.SeedAsync(operatorContext);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -59,9 +45,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
 app.Run();
