@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using System.Reflection.Metadata;
 using ASPNetCoreApp.Models;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
+
 namespace ASPNetCoreApp.Controllers
 {
     [Route("api/[controller]")]
@@ -60,6 +63,7 @@ namespace ASPNetCoreApp.Controllers
         }
 
         [HttpPost]
+    //    [Authorize(Roles = "admin")]
         public async Task<IActionResult> Create([FromBody] Тариф тариф)
         {
             if (!ModelState.IsValid)
@@ -92,6 +96,7 @@ namespace ASPNetCoreApp.Controllers
         }
 
         [HttpDelete("{id}")]
+        //[Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             if (!ModelState.IsValid)

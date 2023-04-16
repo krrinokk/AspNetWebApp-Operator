@@ -2,6 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using ASPNetCoreApp.Models;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
+
 namespace WebAPI.Controllers
 {
     [Route("api/[controller]")]
@@ -69,6 +72,7 @@ namespace WebAPI.Controllers
 
         // POST: api/Dogovors
         [HttpPost]
+       // [Authorize(Roles = "user")]
         public async Task<ActionResult<Dogovor>> PostDogovor(Dogovor dogovor)
         {
             if (!ModelState.IsValid)
@@ -83,6 +87,7 @@ namespace WebAPI.Controllers
 
         // DELETE: api/Dogovors/5
         [HttpDelete("{id}")]
+    //    [Authorize(Roles = "user")]
         public async Task<IActionResult> DeleteDogovor(int id)
         {
             var dogovor = await _context.Dogovor.FindAsync(id);

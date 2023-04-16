@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using System.Reflection.Metadata;
 using ASPNetCoreApp.Models;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
+
 namespace ASPNetCoreApp.Controllers
 {
     [Route("api/[controller]")]
@@ -55,6 +58,7 @@ namespace ASPNetCoreApp.Controllers
         }
 
         [HttpPost]
+      //  [Authorize(Roles = "user")]
         public async Task<IActionResult> Create([FromBody] Клиент Клиент)
         {
             if (!ModelState.IsValid)
@@ -87,6 +91,7 @@ namespace ASPNetCoreApp.Controllers
         }
 
         [HttpDelete("{id}")]
+     //   [Authorize(Roles = "user")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             if (!ModelState.IsValid)

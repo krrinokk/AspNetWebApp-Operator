@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using ASPNetCoreApp.Models;
 
 namespace ASPNetCoreApp.Controllers
 {
@@ -10,11 +11,13 @@ namespace ASPNetCoreApp.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+
         public AccountController(UserManager<User> userManager, SignInManager<User> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
         }
+
         [HttpPost]
         [Route("api/account/register")]
         [AllowAnonymous]
@@ -27,6 +30,8 @@ namespace ASPNetCoreApp.Controllers
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
+                    // Установка роли User
+                    await _userManager.AddToRoleAsync(user, "user");
                     // Установка куки
                     await _signInManager.SignInAsync(user, false);
                     return Ok(new { message = "Добавлен новый пользователь: " + user.UserName });
@@ -55,6 +60,7 @@ namespace ASPNetCoreApp.Controllers
                 return Created("", errorMsg);
             }
         }
+
         [HttpPost]
         [Route("api/account/login")]
         //[AllowAnonymous]
@@ -63,11 +69,31 @@ namespace ASPNetCoreApp.Controllers
             if (ModelState.IsValid)
             {
                 var result =
-                await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
+                    await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
                 if (result.Succeeded)
                 {
-                    return Ok(new { message = "Выполнен вход", userName = model.Email });
-                }
+                    User usr = await GetCurrentUserAsync();
+                    if (usr == null)
+                    {
+                        return Unauthorized(new
+                        {
+                            message = "Ошибка выполнения авторизации" });}
+
+
+
+                        IList<string> roles = await _userManager.GetRolesAsync(usr);
+                        string? userRole = roles.FirstOrDefault();
+
+                        return Ok(new
+                        {
+                            message = "Выполнен вход",
+                            userName =
+
+                        model.Email,
+                            userRole
+                        });
+
+                    }
                 else
                 {
                     ModelState.AddModelError("", "Неправильный логин и (или) пароль");
@@ -89,6 +115,7 @@ namespace ASPNetCoreApp.Controllers
                 return Created("", errorMsg);
             }
         }
+
         [HttpPost]
         [Route("api/account/logoff")]
         public async Task<IActionResult> LogOff()
@@ -102,6 +129,7 @@ namespace ASPNetCoreApp.Controllers
             await _signInManager.SignOutAsync();
             return Ok(new { message = "Выполнен выход", userName = usr.UserName });
         }
+
         [HttpGet]
         [Route("api/account/isauthenticated")]
         public async Task<IActionResult> IsAuthenticated()
@@ -111,7 +139,9 @@ namespace ASPNetCoreApp.Controllers
             {
                 return Unauthorized(new { message = "Вы Гость. Пожалуйста, выполните вход" });
             }
-            return Ok(new { message = "Сессия активна", userName = usr.UserName });
+            IList<string> roles = await _userManager.GetRolesAsync(usr);
+            string? userRole = roles.FirstOrDefault();
+            return Ok(new { message = "Сессия активна", userName = usr.UserName, userRole });
         }
         private Task<User> GetCurrentUserAsync() => _userManager.GetUserAsync(HttpContext.User);
     }
